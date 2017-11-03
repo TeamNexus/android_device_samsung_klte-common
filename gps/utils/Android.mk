@@ -1,6 +1,3 @@
-ifneq ($(BUILD_TINY_ANDROID),true)
-#Compile this library only for builds with the latest modem image
-
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -59,13 +56,9 @@ LOCAL_COPY_HEADERS:= \
    loc_misc_utils.h
 
 LOCAL_MODULE := libgps.utils
-
-LOCAL_MODULE_RELATIVE_PATH := hw
-
-LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_OWNER := qcom
 LOCAL_PROPRIETARY_MODULE := true
 
-LOCAL_PRELINK_MODULE := false
+LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
-endif # not BUILD_TINY_ANDROID
