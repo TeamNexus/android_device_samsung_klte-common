@@ -22,9 +22,6 @@
      for different hardware and product builds. -->
 <resources>
 
-    <!-- Is the battery LED intrusive? Used to decide if there should be a disable option -->
-    <bool name="config_intrusiveBatteryLed">true</bool>
-
     <!-- Enable blur support -->
     <bool name="config_uiBlurEnabled">true</bool>
 
