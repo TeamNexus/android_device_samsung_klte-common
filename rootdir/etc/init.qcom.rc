@@ -112,9 +112,6 @@ on post-fs-data
     chmod 0660 /efs/wifi/.mac.info
     restorecon /efs/wifi/.mac.info
 
-    # Set permissions for firmware path control
-    chown wifi wifi /sys/module/dhd/parameters/firmware_path
-
     # Create directory used by audio subsystem
     mkdir /data/vendor/misc/audio 0770 audio audio
 
@@ -269,6 +266,13 @@ on post-fs-data
 
     #Create folder for mm-qcamera-daemon
     mkdir /data/vendor/camera 0770 camera camera
+
+    # Create netmgr log dir
+    mkdir /data/vendor/netmgr 0770 radio radio
+    chmod 0770 /data/vendor/netmgr
+
+    # Create directory for radio
+    mkdir /data/vendor/radio 0770 system radio
 
 on early-boot
     # set RLIMIT_MEMLOCK to 64MB
@@ -864,6 +868,9 @@ on boot
     chmod 0640 /efs/gyro_cal_data
     restorecon /efs/gyro_cal_data
 
+    # Set permissions for firmware path control
+    chown wifi wifi /sys/module/dhd/parameters/firmware_path
+
 # Services begin here
 
 service adsprpcd /system/bin/adsprpcd
@@ -925,13 +932,22 @@ service qmuxd /system/bin/qmuxd
     user radio
     group radio audio bluetooth gps qcom_diag log
 
-service wpa_supplicant /system/bin/wpa_supplicant \
-    -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
-    -I/system/etc/wifi/wpa_supplicant_overlay.conf -N \
-    -ip2p0 -Dnl80211 -c/data/misc/wifi/p2p_supplicant.conf \
-    -I/system/etc/wifi/p2p_supplicant_overlay.conf \
-    -puse_p2p_group_interface=1 \
-    -e/data/misc/wifi/entropy.bin -g@android:wpa_wlan0
+service netmgrd /system/bin/netmgrd
+    class main
+    user root
+    group root wifi wakelock radio inet
+
+service wpa_supplicant /vendor/bin/hw/wpa_supplicant \
+        -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
+        -I/system/etc/wifi/wpa_supplicant_overlay.conf -N \
+        -ip2p0 -Dnl80211 -c/data/misc/wifi/p2p_supplicant.conf \
+        -I/system/etc/wifi/p2p_supplicant_overlay.conf \
+        -puse_p2p_group_interface=1 \
+        -e/data/misc/wifi/entropy.bin -g@android:wpa_wlan0
+    class main
+    socket wpa_wlan0 dgram 660 wifi wifi
+    disabled
+    oneshot
 
 service macloader /system/vendor/bin/macloader
     class late_start
